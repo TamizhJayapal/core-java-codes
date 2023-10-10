@@ -1,3 +1,5 @@
+//Java Thread priority will set preference/urgency to the thread like setting cpu time, memory utilization
+
 class CarSimulation implements Runnable {
     private String carName;
 
