@@ -21,7 +21,7 @@ class CarSimulation implements Runnable {
     }
 }
 
-public class TrafficSimulation {
+public class ThreadPriorityExample {
     public static void main(String[] args) {
         Thread car1 = new Thread(new CarSimulation("Car A"));
         Thread car2 = new Thread(new CarSimulation("Car B"));
