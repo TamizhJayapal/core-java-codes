@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class SortingArray {
 
@@ -31,10 +32,8 @@ public class SortingArray {
 			}
 		}
 
-		System.out.println();
-		for(int m: numbers) {
-			System.out.print(m+" ");
-		}
+		System.out.println(Arrays.toString(numbers));
+
 
 	}
 
