@@ -21,7 +21,7 @@ class Calculate {
 	}
 }
 
-public class Main {
+public class ArithmenticCalculator {
 
 	public static void main(String[] args) {
 		try(Scanner scanner = new Scanner(System.in)){
