@@ -7,15 +7,36 @@
  * 
  * types of exception
  * compile time , run time and custom exception
+ * 
+ * compileTime:
+ * 
+ * FileNotFound
+ * ClassNotFound
+ * IOException
+ * NoSuchFeild
+ * NoSuchMethod
+ * IllegalArgumentException
+ * 
+ * runtime
+ * 
+ * ArrayIndexOutOfBounds
+ * Arithmetic
+ * NullPointer
+ * NoSuchElement
+ * NumberFormat
+ * ClassCast
+ * 
  */
 
 package com.example;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
-//custom exception
 class InsuffientFundException extends Exception {
 	int amount;
 	InsuffientFundException(int amount){
@@ -23,14 +44,34 @@ class InsuffientFundException extends Exception {
 	}
 }
 
+class FileProcessor {
+	public String readFile(String file) throws IOException, FileNotFoundException {
+		FileReader obj = new FileReader(file);
+		
+		BufferedReader reader = new BufferedReader(obj);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		String line;
+		
+		while((line = reader.readLine()) != null) {
+			sb.append(line);
+		}
+		
+		return sb.toString();
+	}
+}
+
 public class ExceptionHandlingExample {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException, IOException {
 		int a = 10, b =5;
 		int c = 0;
 		int[] arr = null;
 		try {
-      //runtime exception
+			if(b == 0) {
+				throw new ArithmeticException("Denominator can't be zero");
+			}
 			//arithmetic
 			//c = a/b;
 			
@@ -44,7 +85,7 @@ public class ExceptionHandlingExample {
 			}
 		}
 		catch(ArithmeticException e) {
-			System.out.println("Arithmentic error accurred");
+			System.out.println(e.getMessage());
 		}
 		catch(NullPointerException e) {
 			System.out.println("null pointer error accurred");
@@ -70,7 +111,12 @@ public class ExceptionHandlingExample {
 			e.printStackTrace();
 		}
 		
-		System.out.println(c);
+		
+		FileProcessor fp = new FileProcessor();
+		String content = fp.readFile("input.txt");
+		System.out.println(content);
+		
+		//System.out.println(c);
 		System.out.println("program completed");
 	}
 
