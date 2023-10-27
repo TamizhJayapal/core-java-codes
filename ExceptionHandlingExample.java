@@ -37,11 +37,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-class InsuffientFundException extends Exception {
-	int amount;
-	InsuffientFundException(int amount){
-		amount = amount;
+class InsufficientException extends Exception {
+	public int amount;
+	
+	InsufficientException(int amount) {
+		this.amount = amount;
 	}
+	
+	@Override()
+	public String getMessage() {
+        return "Insufficient fund: "+ amount;
+    }
 }
 
 class FileProcessor {
@@ -78,11 +84,6 @@ public class ExceptionHandlingExample {
 			//null pointer / array index out
 			//arr[1] = 5;
 			
-			int balance = 500;
-			int withdraw = 1000;
-			if(balance < withdraw) {
-				throw new InsuffientFundException(withdraw - balance);
-			}
 		}
 		catch(ArithmeticException e) {
 			System.out.println(e.getMessage());
@@ -98,6 +99,16 @@ public class ExceptionHandlingExample {
 		}
 		finally {
 			System.out.println("code must executed");
+		}
+
+		int balance = 500, withdraw = 1000;
+		try {
+			if(balance < withdraw) {
+				int amount = withdraw - balance;
+				throw new InsufficientException(amount);
+			}
+		} catch(InsufficientException e) {
+			System.out.println(e.getMessage());
 		}
 		
 		
