@@ -1,252 +1,285 @@
+package com.example;
+
+import java.io.IOException;
 import java.sql.*;
+import java.util.Scanner;
 
-public class JDBCDemo {
+public class JdbcExample {
 
-	public static void main(String[] args) throws Exception {
-		batchdemo();
-	}	
-	
-	//simple read from db and display results
-	public static void readRecords() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		String query = "select * from employee";
+	public static final String url = "jdbc:mysql://localhost:3306/university";
 
-		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		Statement st = con.createStatement();
-		ResultSet rs = st.executeQuery(query);
-		
-		while(rs.next()) {
-			System.out.println("Id is " + rs.getInt(1));
-			System.out.println("Name is " + rs.getString(2));
-			System.out.println("Salary is " + rs.getInt(3));
+	public static final String userName = "root";
+
+	public static final String password = "root@123";
+
+	public static void main(String[] args) throws SQLException, IOException {
+
+		try (Scanner scanner = new Scanner(System.in)) {
+
+			while (true) {
+				System.out.println("Select the operation");
+
+				System.out.println("1. read data");
+
+				System.out.println("2. insert data");
+
+				System.out.println("3. update data");
+
+				System.out.println("4. delete data");
+
+				System.out.println("5. exit");
+
+				System.out.println("________________________");
+				System.out.println();
+
+				int option = scanner.nextInt();
+
+				int rollno;
+				String name;
+
+				switch (option) {
+
+				case 1:
+					batchUpdate();
+					break;
+
+				case 2:
+					System.out.println("enter roll no");
+					rollno = scanner.nextInt();
+					System.out.println("enter name");
+					name = scanner.next();
+
+					insertRecord(rollno, name);
+					break;
+
+				case 3:
+					System.out.println("enter rollno to update: ");
+					rollno = scanner.nextInt();
+
+					System.out.println("enter name to update: ");
+					name = scanner.next();
+
+					updateRecord(rollno, name);
+					break;
+
+				case 4:
+					System.out.println("enter rollno to delete");
+
+					rollno = scanner.nextInt();
+
+					deleteRecord(rollno);
+					break;
+
+				case 5:
+					System.out.println("program completed");
+					System.exit(0);
+					break;
+
+				default:
+					System.out.println("Invalid option");
+					break;
+				}
+
+			}
+
 		}
-				
+	}
+
+//	public static void readRecord() throws SQLException {
+//
+//		String query = "select * from students";
+//		Connection con = DriverManager.getConnection(url, userName, password);
+//
+//		Statement statement = con.createStatement();
+//
+//		ResultSet rs = statement.executeQuery(query);
+//
+//		while (rs.next()) {
+//			System.out.println(rs.getInt(1) + " | " + rs.getString(2));
+//		}
+//		System.out.println();
+//		con.close();
+//	}
+	
+	//read record using stored procedure
+	public static void readRecord() throws SQLException {
+
+		Connection con = DriverManager.getConnection(url, userName, password);
+
+		CallableStatement statement = con.prepareCall("{call getStudentDetails()}");
+
+		ResultSet rs = statement.executeQuery();
+
+		while (rs.next()) {
+			System.out.println(rs.getInt(1) + " | " + rs.getString(2));
+		}
+		System.out.println();
 		con.close();
 	}
 	
-	//insert query
-	public static void insertRecord() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		String query = "insert into employee values (4,'priya',250000)";
+	//read record using stored procedure with input param
+		public static void readRecordById(int id) throws SQLException {
 
+			Connection con = DriverManager.getConnection(url, userName, password);
+
+			CallableStatement statement = con.prepareCall("{call getStudentById(?)}");
+			statement.setInt(1, id);
+			
+			ResultSet rs = statement.executeQuery();
+
+			while (rs.next()) {
+				System.out.println(rs.getInt(1) + " | " + rs.getString(2));
+			}
+			System.out.println();
+			con.close();
+		}
 		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		Statement st = con.createStatement();
-		int rows = st.executeUpdate(query);
+		//procedure with out param
 		
-		System.out.println("Number of rows affected: " + rows);		
-		con.close();
-	}
+		public static void getNameById(int id) throws SQLException {
+
+			Connection con = DriverManager.getConnection(url, userName, password);
+
+			CallableStatement statement = con.prepareCall("{call getNameById(?,?)}");
+			statement.setInt(1, id);
+			statement.registerOutParameter(2, Types.VARCHAR);
+			
+			statement.executeUpdate();
+			
+			
+
+			System.out.println(statement.getString(2));
+			
+			System.out.println();
+			con.close();
+		}
+
+//	public static void insertRecord(int rollno, String name) throws SQLException {
+//
+//		String query = "insert into students values(" + rollno + ",'" + name + "')";
+//		Connection con = DriverManager.getConnection(url, userName, password);
+//
+//		Statement statement = con.createStatement();
+//
+//		int rows = statement.executeUpdate(query);
+//
+//		System.out.println("no of rows affected " + rows);
+//		System.out.println();
+//
+//		con.close();
+//	}
 	
-	//insert with variables
-	public static void insertVar() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		
-		int id=5;
-		String name = "Varun";
-		int salary = 300000;
-		
-		// "insert into employee values(5,'varun',300000);"
-		String query = "insert into employee values (" + id + ",'" + name + "'," + salary + ");";
-
-		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		Statement st = con.createStatement();
-		int rows = st.executeUpdate(query);
-		
-		System.out.println("Number of rows affected: " + rows);		
-		con.close();
-	}
+	// insert using prepare statement
 	
-	//insert with prepared statement
-	public static void insertUsingPst() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		
-		int id=6;
-		String name = "Nila";
-		int salary = 300000;
-		
-		// "insert into employee values(5,'varun',300000);"
-		String query = "insert into employee values (?,?,?);";
+	public static void insertRecord(int rollno, String name) throws SQLException {
 
+		String query = "insert into students values(?,?)";
+
+		Connection con = DriverManager.getConnection(url, userName, password);
 		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
+		PreparedStatement statement = con.prepareStatement(query);
 		
-		PreparedStatement pst = con.prepareStatement(query);
-		pst.setInt(1, id);
-		pst.setString(2, name);
-		pst.setInt(3, salary);
-		int rows = pst.executeUpdate();
+		statement.setInt(1, rollno);
+		
+		statement.setString(2, name);
+		
+		int rows = statement.executeUpdate();
 		
 		System.out.println("Number of rows affected: " + rows);	
-		con.close();
-		
-	}
-	
-	//delete
-	public static void delete() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		
-		int id=5;
-
-		String query = "delete from employee where emp_id = " + id;
-
-		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		Statement st = con.createStatement();
-		int rows = st.executeUpdate(query);
-		
-		System.out.println("Number of rows affected: " + rows);		
-		con.close();
-	}
-	
-	//update
-	public static void update() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		
-
-		String query = "update employee set salary = 150000 where emp_id=1";
-
-		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		Statement st = con.createStatement();
-		int rows = st.executeUpdate(query);
-		
-		System.out.println("Number of rows affected: " + rows);		
-		con.close();
-	}
-	
-	//Types of statement
-	//normal statement
-	//prepared statement
-	//callable statement call GetEmp()
-	
-	//calling simple stored procedure
-	public static void sp() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		CallableStatement cst = con.prepareCall("{call GetEmp()}");
-		ResultSet rs = cst.executeQuery();
-		
-		while(rs.next()) {
-			System.out.println("Id is " + rs.getInt(1));
-			System.out.println("Name is " + rs.getString(2));
-			System.out.println("Salary is " + rs.getInt(3));
-		}
+		System.out.println();
 		
 		con.close();
 	}
-	
-	//calling stored procedure with input parameter
-	public static void sp2() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		int id = 3;
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		CallableStatement cst = con.prepareCall("{call GetEmpById(?)}");
-		cst.setInt(1, id);
-		ResultSet rs = cst.executeQuery();
-		
-		while(rs.next()) {
-			System.out.println("Id is " + rs.getInt(1));
-			System.out.println("Name is " + rs.getString(2));
-			System.out.println("Salary is " + rs.getInt(3));
-		}
-		
-		con.close();
-	}
-	
-	//calling stored procedure with in and out parameter
-	public static void sp3() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
-		int id = 3;
-		Connection con = DriverManager.getConnection(url,userName,passWord);
-		CallableStatement cst = con.prepareCall("{call GetNameById(?,?)}");
-		cst.setInt(1, id);
-		cst.registerOutParameter(2, Types.VARCHAR);
-		
-		cst.executeUpdate();
-		
-		System.out.println(cst.getString(2));
-		
-		con.close();
-	}
-	
-	//commit vs autocommit
-	public static void commitdemo() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
 
-		String query1 = "update employee set salary = 550000 where emp_id=1";
-		String query2 = "update employee set salary = 550000 where emp_id=2";
+	public static void updateRecord(int rollno, String name) throws SQLException {
+
+		String query = "update students set name='" + name + "' where rollno =" + rollno;
+		Connection con = DriverManager.getConnection(url, userName, password);
+
+		Statement statement = con.createStatement();
+
+		int rows = statement.executeUpdate(query);
+
+		System.out.println("no of rows affected " + rows);
+		System.out.println();
+
+		con.close();
+	}
+
+	public static void deleteRecord(int rollno) throws SQLException {
+		String query = "delete from students where rollno =" + rollno;
+
+		Connection con = DriverManager.getConnection(url, userName, password);
+
+		Statement statement = con.createStatement();
+
+		int rows = statement.executeUpdate(query);
+
+		System.out.println("number of rows affected: " + rows);
+		System.out.println();
+
+		con.close();
+	}
+	
+	// commit and auto commit
+	
+	public static void updateBulkRecord() throws SQLException {
+
+		String query1 = "update students set deptartment='IT' where rollno = 1";
+		String query2 = "update students set deptartment='IT' where rollno = 2";
 		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
+		Connection con = DriverManager.getConnection(url, userName, password);
 		con.setAutoCommit(false);
-		Statement st = con.createStatement();
-		int rows1 = st.executeUpdate(query1);
-		System.out.println("Rows affected " + rows1);
 		
-		int rows2 = st.executeUpdate(query2);
-		System.out.println("Rows affected " + rows2);
+		Statement statement = con.createStatement();
+
+		int rows1 = statement.executeUpdate(query1);
+
+		System.out.println("no of rows affected " + rows1);
 		
-		if(rows1>0 && rows2>0)
+		int rows2 = statement.executeUpdate(query2);
+
+		System.out.println("no of rows affected " + rows2);
+		
+		if(rows1 >0 && rows2 >0)
 			con.commit();
 		
-		con.close();
 		
-	}
-	
-	//batch processing
-	
-	public static void batchdemo() throws Exception{
-		String url = "jdbc:mysql://localhost:3306/jdbcdemo";
-		String userName = "root";
-		String passWord = "Test";
+		System.out.println();
 
-		String query1 = "update employee set salary = 300000 where emp_id=1";
-		String query2 = "update employee set salary = 300000 where emp_id=2";
-		String query3 = "update employee set salary = 300000 where emp_id=3";
-		String query4 = "update employee set salary = 300000 where emp_id=4";
+		con.close();
+	}
+
+	//rollback
+	
+	public static void batchUpdate() throws SQLException {
+		String query1 = "update students set deptartment='CSE' where rollno = 1";
+		String query2 = "update students set deptartment='CSE' where rollno = 2";
+		String query3 = "update students set deptartment='CSE' where rollno = 6";
+		String query4 = "update students set deptartment='CSE' where rollno = 9";
 		
-		Connection con = DriverManager.getConnection(url,userName,passWord);
+		
+		Connection con = DriverManager.getConnection(url, userName, password);
 		con.setAutoCommit(false);
-		Statement st = con.createStatement();
-		st.addBatch(query1);
-		st.addBatch(query2);
-		st.addBatch(query3);
-		st.addBatch(query4);
 		
-		int[] res = st.executeBatch();
+		Statement statement = con.createStatement();
+		statement.addBatch(query1);
+		statement.addBatch(query2);
+		statement.addBatch(query3);
+		statement.addBatch(query4);
 		
-		for(int i: res) {
+		int rows[] = statement.executeBatch();
+
+		for(int i: rows){
+			System.out.println("no of rows affected " + i);
 			if(i>0)
 				continue;
 			else
 				con.rollback();
 		}
 		con.commit();
+		System.out.println();
+
 		con.close();
-		
 	}
-	
 }
