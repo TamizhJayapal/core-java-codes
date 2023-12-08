@@ -1,3 +1,8 @@
+/*
+ * The Prototype pattern is used to create new objects by copying an existing object, 
+ * known as the prototype. It involves creating new instances by cloning an existing instance.
+ */
+
 class Car implements Cloneable {
     private String model;
 
