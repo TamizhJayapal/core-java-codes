@@ -1,9 +1,11 @@
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,8 +19,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.StringBufferInputStream;
-import java.util.Scanner;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -41,72 +41,12 @@ class MyClass implements Serializable {
 }
 
 class ByteStream {
-    public static void byteInput() {
-
-        byte[] byteArray = { 65, 66, 67, 68, 70 };
-        ByteArrayInputStream baStream = new ByteArrayInputStream(byteArray);
-
-        int input = baStream.read();
-
-        while (input != -1) {
-            System.out.print((char) input);
-            input = baStream.read();
-        }
-
-    }
-
-    @SuppressWarnings("deprecation")
-    public static void stringBufferStream() {
-        String data = "Hello, World!";
-        try (StringBufferInputStream inputStream = new StringBufferInputStream(data)) {
-            int byteRead;
-            while ((byteRead = inputStream.read()) != -1) {
-                System.out.println((char) byteRead);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-        }
-    }
-
-    public static void inputStreamReader() {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Enter a line of text: ");
-        try {
-            String line = reader.readLine();
-            System.out.println("You entered: " + line);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static void audioStream()
-            throws UnsupportedAudioFileException, IOException, LineUnavailableException, InterruptedException {
-        File file = new File("C:\\Users\\jtamizhazhagan\\Documents\\audios\\sample_audio.wav");
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-
-        Clip clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
-
-        // Start playing the audio
-        clip.start();
-
-        // Sleep for a while to allow the audio to play
-        Thread.sleep(clip.getMicrosecondLength() / 1000);
-
-        // Close the Clip and AudioInputStream when done
-        clip.close();
-        audioInputStream.close();
-    }
-
     public static void objectReadWrite() throws IOException, ClassNotFoundException {
-
-        File obj = new File("C:/Users/jtamizhazhagan/Documents/for_file/test.txt");
+        File obj = new File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files/test.txt"); // file path
         if (!obj.exists()) {
             obj.createNewFile();
         }
+
         MyClass myClass = new MyClass(12);
 
         FileOutputStream fileOutputStream = new FileOutputStream(obj);
@@ -116,167 +56,245 @@ class ByteStream {
 
         FileInputStream fileInputStream = new FileInputStream(obj);
         ObjectInputStream objInputStream = new ObjectInputStream(fileInputStream);
-
         Object obj2 = objInputStream.readObject();
-
         MyClass obj3 = (MyClass) obj2;
-
         System.out.println(obj3.getId());
-
     }
 
-    public static void readRawData() {
-        File obj = new File("C:/Users/jtamizhazhagan/Documents/for_file/test.txt");
-        try {
+    public static void byteArrayInputOutput() {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            byteArrayOutputStream.write("Hello, ".getBytes());
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-            // OutputStream outputStream = new FileOutputStream(obj);
-            // DataOutputStream doStream = new DataOutputStream(outputStream);
-            //
-            // doStream.writeInt(44);
-            // doStream.writeDouble(44.23);
-            // doStream.writeBoolean(true);
-            // doStream.close();
-            ////
-            ////
-            // InputStream inputStream = new FileInputStream(obj);
-            // DataInputStream diStream = new DataInputStream(inputStream);
-            // int intVal = diStream.readInt();
-            // double doubleVal = diStream.readDouble();
-            // boolean booleanVal = diStream.readBoolean();
-            ////
-            // System.out.println(intVal);
-            // System.out.println(doubleVal);
-            // System.out.println(booleanVal);
-            //
+            // String result = new String(byteArray);
+            // System.out.println(result);
 
-            OutputStream outputStream1 = new FileOutputStream(obj);
+            ByteArrayInputStream baStream = new ByteArrayInputStream(byteArray);
 
-            byte[] byteArr = new byte[] { 72, 101, 108, 108, 111 };
-            outputStream1.write(byteArr);
-
-            InputStream inputStream1 = new FileInputStream(obj);
-            int input = inputStream1.read();
+            int input = baStream.read();
             while (input != -1) {
                 System.out.print((char) input);
-                input = inputStream1.read();
+                input = baStream.read();
             }
-
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
+    public static void audioStream()
+            throws UnsupportedAudioFileException, IOException, LineUnavailableException, InterruptedException {
+        File file = new File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files/sample_audio.wav");
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioInputStream);
+        clip.start();
+
+        Thread.sleep(clip.getMicrosecondLength() / 1000);
+        
+        clip.close();
+        audioInputStream.close();
+    }
+
+     public static void readRawData() {
+        File obj = new File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files/test.txt");
+        try {
+            OutputStream outputStream = new FileOutputStream(obj);
+            DataOutputStream doStream = new DataOutputStream(outputStream);
+            
+            doStream.writeInt(44);
+            doStream.writeDouble(44.23);
+            doStream.writeBoolean(true);
+            doStream.close();
+        
+            InputStream inputStream = new FileInputStream(obj);
+            DataInputStream diStream = new DataInputStream(inputStream);
+            int intVal = diStream.readInt();
+            double doubleVal = diStream.readDouble();
+            boolean booleanVal = diStream.readBoolean();
+            
+            System.out.println(intVal);
+            System.out.println(doubleVal);
+            System.out.println(booleanVal);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // @SuppressWarnings("deprecation")
+    // public static void stringBufferStream() {
+    // String data = "Hello, World!";
+    // try (StringBufferInputStream inputStream = new StringBufferInputStream(data))
+    // {
+    // int byteRead;
+    // while ((byteRead = inputStream.read()) != -1) {
+    // System.out.println((char) byteRead);
+    // }
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // }
+
+    // public static void inputStreamReader() {
+    //     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    //     System.out.println("Enter a line of text: ");
+    //     try {
+    //         String line = reader.readLine();
+    //         System.out.println("You entered: " + line);
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+
+    // }
+   
 }
 
 public class FileHandlingExample {
-
-    public FileHandlingExample() {
-    }
-
     public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedAudioFileException,
             LineUnavailableException, InterruptedException {
+        //-------- char stream (unicode conversion) vs byte stream (byte by byte(8 bits))---------//
+        // ------ Type 1: File / FileWriter and its methods. -------
+        // Read and write stream of character data
 
-       // ByteStream.audioStream();
-        
-        // Stream - sequence of data
+        // File obj = new
+        // File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files"); //
+        // folder path
 
-        // InputStream - read
-        // OutputStreeam - write
+        // list all file and folder names
+        // String[] filesString = obj.list();
+        // for (String file : filesString) {
+        // System.out.println(file);
+        // }
 
-        // FileInput/OuStream
-        // ObjectInputStream
-        // ByteArrayInputStream
-        // AudioInputStream
-        // FilterInputStream
-        // DataInputStream
+        // getting filse details as file array
+        // File[] files = obj.listFiles();
+        // for (File file : files) {
+        // if (file.isFile()) {
+        // System.out.println(file.getName());
+        // }
+        // }
+
+        // File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files/test.txt");
+        // // file path
+
+        // exists
+        // if (!obj.exists()) {
+        // System.out.println("file not exists");
+        // obj.createNewFile();
+        // }
+
+        // length
+        // System.out.println(obj.length());
+
+        // can write
+        // can execute
+        // can read
+        // if (obj.canWrite()) {
+        // // writing data to file
+        // FileWriter writer = new FileWriter(obj);
+        // writer.write(78);
+        // writer.write("Hi Hello How Are You!");
+        // writer.flush();
+        // writer.close();
+        // }
+
+        // if (obj.canRead()) {
+        // // reading the file data
+        // FileReader reader = new FileReader(obj);
+        // int output = reader.read();
+        // while (output != -1) {
+        // output = reader.read();
+        // System.out.print((char) output);
+        // }
+        // }
+
+        // ------ Type 2: Buffered Read and Write ------
+        // read and write line by line (stream of char data)
 
         // File obj = new File("C:/Users/jtamizhazhagan/Documents/for_file/test.txt");
-        //
+        // //file path
+
         // try {
-        // //File Writing part
+        // // File Writing part
         // FileWriter fileWriter = new FileWriter(obj, true);
         // BufferedWriter bWriter = new BufferedWriter(fileWriter);
-        //
+
         // bWriter.write("Hi Hello How Are you!");
         // bWriter.newLine();
         // bWriter.flush();
         // bWriter.close();
-        //
-        // //File Reading part
+
+        // // File Reading part
         // FileReader fileReader = new FileReader(obj);
         // BufferedReader bReader = new BufferedReader(fileReader);
-        //
+
         // String output = bReader.readLine();
-        // while(output != null) {
+        // while (output != null) {
         // System.out.println(output);
         // output = bReader.readLine();
         // }
-        //
-        //
-        //
-        // } catch(FileNotFoundException e) {
-        // e.printStackTrace();
-        // } catch(IOException e) {
+        // } catch (Exception e) {
         // e.printStackTrace();
         // }
 
-        // Step 1: File / FileWriter and its methods.
+        // -------- Type 3 Input stream and ouput stream ------------
+        // To read write stream binary/raw byte(8 bit) data and character data
 
-        File obj = new File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files");
-        
-        String[] filesString = obj.list();
-        for (String file : filesString) {
-            System.out.println(file);
-        }
+        // Stream - sequence of data
+        // InputStream - read
+        // OutputStreeam - write
 
-        File[] files = obj.listFiles();
-        for (File file : files) {
-            if (file.isFile()) {
-                System.out.println(file.getName());
-            }
-        }
+        // ------ FileInput/OutputStream ------
 
-        // canExecute
-        // canRead
-        // canWrite
+        // //writing
 
-        // if(obj.exists()) {
-        // if(obj.canRead()) {
-        // System.out.println(obj.getName());
-        // }
-        //
-        // }else {
-        // System.out.println("not exist");
-        // obj.createNewFile();
+        // File obj = new
+        // File("/Users/tamizhazhaganjayapal/Documents/core-java-codes/my_files/test.txt");
+        // // file path
+
+        // FileOutputStream fileOutputStream = new FileOutputStream(obj);
+        // fileOutputStream.write("hi hello".getBytes());
+        // fileOutputStream.flush();
+        // fileOutputStream.close();
+
+        // // reading
+        // FileInputStream fileInputStream = new FileInputStream(obj);
+        // int input = fileInputStream.read();
+        // while (input != -1) {
+        // System.out.print((char)input);
+        // input = fileInputStream.read();
         // }
 
-        // FileWriter writer = new FileWriter(obj);
-        //
-        ////
-        // writer.write(78);
-        // writer.write("Hi Hello How Are You!");
-        //
-        // writer.flush();
-        // writer.close();
-        ////
-        // FileReader reader = new FileReader(obj);
-        ////
-        //// System.out.println(file.length());
-        //// char[] ch = new char[(int)file.length()];
-        // int output = reader.read();
-        ////
-        //// for(char ch1: ch) {
-        //// System.out.print(ch1);
-        //// }
-        // while(output != -1) {
-        // System.out.print((char)output);
-        // output = reader.read();
+        // writing
+
+        // FileOutputStream fileOutputStream = new FileOutputStream(obj, true);
+        // BufferedOutputStream bufferedOutputStream = new
+        // BufferedOutputStream(fileOutputStream);
+        // bufferedOutputStream.write("hi buddy".getBytes());
+        // bufferedOutputStream.flush();
+        // bufferedOutputStream.close();
+
+        // //reading
+        // FileInputStream fileInputStream = new FileInputStream(obj);
+        // BufferedInputStream bufferedInputStream = new
+        // BufferedInputStream(fileInputStream);
+        // int input = bufferedInputStream.read();
+        // while (input != -1) {
+        // System.out.print((char)input);
+        // input = fileInputStream.read();
         // }
 
+        //ObjectInputStream 
+
+        // ByteStream.objectReadWrite();
+
+        // ByteArrayInputStream
+        //ByteStream.byteArrayInputOutput();
+
+        // AudioInputStream
+        //ByteStream.audioStream();
+
+        // DataInputStream
+         ByteStream.readRawData();
     }
-
 }
