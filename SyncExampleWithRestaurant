@@ -1,0 +1,76 @@
+package com.thread.glass;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+class SyncExampleWithRestaurant {
+    private static final Object menu = new Object();
+
+    // Chef thread
+    static class Chef implements Runnable {
+        public void run() {
+            System.out.println("Chef is ready to cook.");
+            synchronized (menu) {
+                System.out.println("Chef is checking the menu.");
+                try {
+                    TimeUnit.SECONDS.sleep(2); // Chef takes 2 seconds to check the menu
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Chef is preparing the order.");
+                try {
+                    TimeUnit.SECONDS.sleep(3); // Chef takes 3 seconds to prepare the order
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Chef has prepared the order.");
+                System.out.println("Chef serves the order to the customer.");
+            }
+        }
+    }
+
+    // Customer thread
+    static class Customer implements Runnable {
+        public void run() {
+            System.out.println("Customer enters the restaurant.");
+            synchronized (menu) {
+                System.out.println("Customer is looking at the menu.");
+                try {
+                    TimeUnit.SECONDS.sleep(1); // Customer takes 1 second to look at the menu
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Customer places an order.");
+                System.out.println("Customer waits for the order to be prepared.");
+            }
+
+            try {
+                TimeUnit.SECONDS.sleep(6); // Customer waits for the order
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Customer receives the order and enjoys the meal.");
+        }
+    }
+
+    public static void main(String[] args) {
+        Thread chefThread = new Thread(new Chef());
+        Thread customerThread = new Thread(new Customer());
+
+        chefThread.start();
+        customerThread.start();
+       // customerThread.setPriority(Thread.MAX_PRIORITY);
+
+        try {
+            chefThread.join();
+            customerThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Restaurant simulation is complete.");
+    }
+}
